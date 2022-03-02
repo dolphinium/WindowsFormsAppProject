@@ -16,5 +16,72 @@ namespace WindowsFormsAppProject
         {
             InitializeComponent();
         }
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            ListCategories();
+            ListProducts();
+        }
+
+        private void ListProducts()
+        {
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                dgwProduct.DataSource = context.Products.ToList(); //   automatically provides SELECT*FROM PRODUCTS
+            }
+        }
+
+        private void ListCategories()
+        {
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                cbxCategory.DataSource = context.Categories.ToList();
+                cbxCategory.DisplayMember = "CategoryName";
+                cbxCategory.ValueMember = "CategoryId";
+            }
+        }
+
+        private void ListProductsByCategory(int categoryId)
+        {
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                dgwProduct.DataSource = context.Products.Where(p => p.CategoryId == categoryId).ToList();
+            }
+        }
+
+        private void ListProductsByProductName(string key)
+        {
+            using (NorthwindContext context = new NorthwindContext())
+            {
+                dgwProduct.DataSource = context.Products.Where(p => p.ProductName.ToLower().Contains(key.ToLower()))
+                    .ToList();
+            }
+        }
+
+        private void cbxCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                ListProductsByCategory(Convert.ToInt32(cbxCategory.SelectedValue));
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private void tbxSearch_TextChanged(object sender, EventArgs e)
+        {
+            string key = tbxSearch.Text;
+            if (string.IsNullOrEmpty(key))
+            {
+                ListProducts();
+            }
+            else
+            {
+                ListProductsByProductName(key);
+            }
+        }
     }
 }
